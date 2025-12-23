@@ -136,6 +136,9 @@ class CoppeliaSimBridge:
     def read_vision_sensor(self, sensor_handle: int):
         return self._call_sync(lambda: self.sim.readVisionSensor(sensor_handle))
 
+    def read_proximity_sensor(self, sensor_handle: int):
+        return self._call_sync(lambda: self.sim.readProximitySensor(sensor_handle))
+
     def get_joint_position(self, joint_handle: int) -> Optional[float]:
         """Get joint position (angle in radians)."""
         return self._call_sync(lambda: self.sim.getJointPosition(joint_handle))
