@@ -94,6 +94,8 @@ class CoppeliaSimBridge:
 
     # Public API - Thread-safe wrappers around CoppeliaSim functions
 
+    # FIXME: bridge.get_object_handle() returns int, not Optional[int]
+    # Value of -1 means object not found, but it's always still an int.
     def get_object_handle(self, path: str) -> Optional[int]:
         """Get object handle by path/name."""
         return self._call_sync(lambda: self.sim.getObject(path))
@@ -166,3 +168,14 @@ class CoppeliaSimBridge:
     def get_simulation_time(self) -> float:
         """Get current simulation time."""
         return self._call_sync(lambda: self.sim.getSimulationTime())
+
+    def step(self):
+        """Step the simulation."""
+        return self._call_sync(lambda: self.sim.step())
+
+    def set_stepping(self, enable) -> int:
+        """
+        Turn stepping mode on/off.
+        Returns: bool of previous level of thread interruption
+        """
+        return self._call_sync(lambda: self.sim.setStepping(enable))
