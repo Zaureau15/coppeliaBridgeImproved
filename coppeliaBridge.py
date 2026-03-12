@@ -115,8 +115,6 @@ class CoppeliaSimBridge:
         """Get object handle by path/name."""
         return self._call_sync(lambda: self.sim.getObject(path))
 
-    getObject = get_object_handle
-
     def get_object_position(
         self, object_handle: int, relative_to: int = -1
     ) -> Optional[list[float]]:
@@ -124,8 +122,6 @@ class CoppeliaSimBridge:
         return self._call_sync(
             lambda: self.sim.getObjectPosition(object_handle, relative_to)
         )
-
-    getObjectPosition = get_object_position
 
     def set_object_position(
         self, object_handle: int, position: list[float], relative_to: int = -1
@@ -137,8 +133,6 @@ class CoppeliaSimBridge:
             )
         )
 
-    setObjectPosition = set_object_position
-
     def get_object_orientation(
         self, object_handle: int, relative_to: int = -1
     ) -> Optional[list[float]]:
@@ -146,8 +140,6 @@ class CoppeliaSimBridge:
         return self._call_sync(
             lambda: self.sim.getObjectOrientation(object_handle, relative_to)
         )
-
-    getObjectOrientation = get_object_orientation
 
     def set_object_orientation(
         self,
@@ -161,8 +153,6 @@ class CoppeliaSimBridge:
                 object_handle, relative_to, orientation
             )
         )
-
-    setObjectOrientation = set_object_orientation
 
     def get_vision_sensor_img(
         self,
@@ -183,8 +173,6 @@ class CoppeliaSimBridge:
             )
         )
 
-    getVisionSensorImg = get_vision_sensor_img
-
     def unpack_uint8_table(
         self, data: bytes, startUint8Index: int = 0, uint8Count: int = 0
     ) -> Optional[list[int]]:
@@ -196,8 +184,6 @@ class CoppeliaSimBridge:
                 data, startUint8Index, uint8Count
             )
         )
-
-    unpackUInt8Table = unpack_uint8_table
 
     def read_vision_sensor(
         self, sensor_handle: int
@@ -232,8 +218,6 @@ class CoppeliaSimBridge:
             lambda: self.sim.readVisionSensor(sensor_handle)
         )
 
-    readVisionSensor = read_vision_sensor
-
     def read_proximity_sensor(
         self, sensor_handle: int
     ) -> Optional[tuple[int, float, list[float], int, list[float]]]:
@@ -265,13 +249,9 @@ class CoppeliaSimBridge:
             lambda: self.sim.readProximitySensor(sensor_handle)
         )
 
-    readProximitySensor = read_proximity_sensor
-
     def get_joint_position(self, joint_handle: int) -> Optional[float]:
         """Get joint position (angle in radians)."""
         return self._call_sync(lambda: self.sim.getJointPosition(joint_handle))
-
-    getJointPosition = get_joint_position
 
     def set_joint_target_velocity(
         self, joint_handle: int, velocity: float
@@ -281,8 +261,6 @@ class CoppeliaSimBridge:
             lambda: self.sim.setJointTargetVelocity(joint_handle, velocity)
         )
 
-    setJointTargetVelocity = set_joint_target_velocity
-
     def set_joint_target_position(
         self, joint_handle: int, position: float
     ) -> None:
@@ -291,31 +269,21 @@ class CoppeliaSimBridge:
             lambda: self.sim.setJointTargetPosition(joint_handle, position)
         )
 
-    setJointTargetPosition = set_joint_target_position
-
     def start_simulation(self) -> None:
         """Start the simulation."""
         self._call_sync(lambda: self.sim.startSimulation())
-
-    startSimulation = start_simulation
 
     def stop_simulation(self) -> None:
         """Stop the simulation."""
         self._call_sync(lambda: self.sim.stopSimulation())
 
-    stopSimulation = stop_simulation
-
     def get_simulation_time(self) -> Optional[float]:
         """Get current simulation time."""
         return self._call_sync(lambda: self.sim.getSimulationTime())
 
-    getSimulationTime = get_simulation_time
-
     def step(self) -> None:
         """Step the simulation."""
         self._call_sync(lambda: self.sim.step())
-
-    step = step
 
     def set_stepping(self, enable: bool) -> Optional[int]:
         """
@@ -324,8 +292,6 @@ class CoppeliaSimBridge:
         thread interruption was not enabled previously
         """
         return self._call_sync(lambda: self.sim.setStepping(enable))
-
-    setStepping = set_stepping
 
 
 if __name__ == "__main__":
