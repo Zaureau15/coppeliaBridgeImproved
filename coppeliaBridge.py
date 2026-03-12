@@ -14,6 +14,10 @@ VisionSensorReading: TypeAlias = (
 
 VisionSensorImage: TypeAlias = tuple[bytes, list[int]]
 
+ProximitySensorReading: TypeAlias = tuple[
+    int, float, list[float], int, list[float]
+]
+
 
 class ZMQRequest:
     """Request object for synchronous communication."""
@@ -280,7 +284,7 @@ class CoppeliaSimBridge:
 
     def read_proximity_sensor(
         self, sensor_handle: int
-    ) -> Optional[tuple[int, float, list[float], int, list[float]]]:
+    ) -> Optional[ProximitySensorReading]:
         """
         Read the state of a proximity sensor.
         Use this when you are sure you have only one sensor.
@@ -310,6 +314,29 @@ class CoppeliaSimBridge:
         return self._call_sync(
             lambda: self.sim.readProximitySensor(sensor_handle)
         )
+
+    def read_proximity_sensors_multiple(
+        self, sensor_handles: Iterable[int]
+    ) -> list[Optional[ProximitySensorReading]]:
+        """
+        Read the state of multiple proximity sensors.
+        Use this when you are sure you have more than one sensor.
+        It is faster than calling multiple `read_proximity_sensor`s.
+
+        Returns
+        -------
+        list[Optional[ProximitySensorReading]]
+            A list of proximity sensor readings, one for each sensor.
+        """
+        readings: list[Optional[ProximitySensorReading]] = []
+
+        for handle in sensor_handles:
+            reading = self._call_sync(
+                lambda: self.sim.readProximitySensor(handle)
+            )
+            readings.append(reading)
+
+        return readings
 
     def get_joint_position(self, joint_handle: int) -> Optional[float]:
         """Get joint position (angle in radians)."""
