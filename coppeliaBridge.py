@@ -1,11 +1,22 @@
 import threading
 import queue
 import time
-from typing import Any, Optional, Callable, Literal
+from typing import Any, Optional, Callable, Literal, TypeAlias
 from collections.abc import Iterable
 
 # Ignoring type for RemoteAPIClient because stubs are not available
 from coppeliasim_zmqremoteapi_client import RemoteAPIClient  # type: ignore
+
+
+VisionSensorReading: TypeAlias = (
+    tuple[int, list[float], *tuple[list[float], ...]] | Literal[-1]
+)
+
+VisionSensorImage: TypeAlias = tuple[bytes, list[int]]
+
+ProximitySensorReading: TypeAlias = tuple[
+    int, float, list[float], int, list[float]
+]
 
 
 class ZMQRequest:
@@ -161,7 +172,7 @@ class CoppeliaSimBridge:
         rgbaCutOff: float = 0.0,
         pos: list[int] = [0, 0],
         size: list[int] = [0, 0],
-    ) -> Optional[tuple[bytes, list[int]]]:
+    ) -> Optional[VisionSensorImage]:
         """
         Get vision sensor image.
         Consider using alongside unpack_uint8_table to get int values.
@@ -172,6 +183,34 @@ class CoppeliaSimBridge:
                 sensor_handle, options, rgbaCutOff, pos, size
             )
         )
+
+    def get_vision_sensor_img_multiple(
+        self,
+        sensor_handles: Iterable[int],
+        options: int = 0,
+        rgbaCutOff: float = 0.0,
+        pos: list[int] = [0, 0],
+        size: list[int] = [0, 0],
+    ) -> list[Optional[VisionSensorImage]]:
+        """
+        Get images from multiple vision sensors.
+
+        Returns
+        -------
+        list[Optional[VisionSensorImage]]
+            A list of `(image_data, resolution)` tuples, one per sensor.
+        """
+        images: list[Optional[VisionSensorImage]] = []
+
+        for handle in sensor_handles:
+            image = self._call_sync(
+                lambda: self.sim.getVisionSensorImg(
+                    handle, options, rgbaCutOff, pos, size
+                )
+            )
+            images.append(image)
+
+        return images
 
     def unpack_uint8_table(
         self, data: bytes, startUint8Index: int = 0, uint8Count: int = 0
@@ -187,9 +226,7 @@ class CoppeliaSimBridge:
 
     def read_vision_sensor(
         self, sensor_handle: int
-    ) -> Optional[
-        tuple[int, list[float], *tuple[list[float], ...]] | Literal[-1]
-    ]:
+    ) -> Optional[VisionSensorReading]:
         """
         Read the state of a vision sensor.
 
@@ -218,11 +255,40 @@ class CoppeliaSimBridge:
             lambda: self.sim.readVisionSensor(sensor_handle)
         )
 
+    def read_vision_sensors_multiple(
+        self, sensor_handles: Iterable[int]
+    ) -> list[Optional[VisionSensorReading]]:
+        """
+        Read the state of multiple vision sensors.
+        Use this when you are sure you have more than one sensor.
+        It is faster than calling multiple `read_vision_sensor`s.
+
+        Returns
+        -------
+        list[Optional[VisionSensorReading]]
+            A list of readings, one for each sensor.
+        """
+        readings: list[Optional[VisionSensorReading]] = []
+
+        for handle in sensor_handles:
+            reading = self._call_sync(
+                lambda: self.sim.readVisionSensor(handle)
+            )
+
+            if reading == -1:
+                readings.append(None)
+            else:
+                readings.append(reading)
+
+        return readings
+
     def read_proximity_sensor(
         self, sensor_handle: int
-    ) -> Optional[tuple[int, float, list[float], int, list[float]]]:
+    ) -> Optional[ProximitySensorReading]:
         """
         Read the state of a proximity sensor.
+        Use this when you are sure you have only one sensor.
+        It is faster than calling multiple `read_proximity_sensor`s.
 
         Returns
         -------
@@ -248,6 +314,29 @@ class CoppeliaSimBridge:
         return self._call_sync(
             lambda: self.sim.readProximitySensor(sensor_handle)
         )
+
+    def read_proximity_sensors_multiple(
+        self, sensor_handles: Iterable[int]
+    ) -> list[Optional[ProximitySensorReading]]:
+        """
+        Read the state of multiple proximity sensors.
+        Use this when you are sure you have more than one sensor.
+        It is faster than calling multiple `read_proximity_sensor`s.
+
+        Returns
+        -------
+        list[Optional[ProximitySensorReading]]
+            A list of proximity sensor readings, one for each sensor.
+        """
+        readings: list[Optional[ProximitySensorReading]] = []
+
+        for handle in sensor_handles:
+            reading = self._call_sync(
+                lambda: self.sim.readProximitySensor(handle)
+            )
+            readings.append(reading)
+
+        return readings
 
     def get_joint_position(self, joint_handle: int) -> Optional[float]:
         """Get joint position (angle in radians)."""
