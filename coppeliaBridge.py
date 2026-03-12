@@ -1,11 +1,16 @@
 import threading
 import queue
 import time
-from typing import Any, Optional, Callable, Literal
+from typing import Any, Optional, Callable, Literal, TypeAlias
 from collections.abc import Iterable
 
 # Ignoring type for RemoteAPIClient because stubs are not available
 from coppeliasim_zmqremoteapi_client import RemoteAPIClient  # type: ignore
+
+
+VisionSensorReading: TypeAlias = (
+    tuple[int, list[float], *tuple[list[float], ...]] | Literal[-1]
+)
 
 
 class ZMQRequest:
@@ -187,9 +192,7 @@ class CoppeliaSimBridge:
 
     def read_vision_sensor(
         self, sensor_handle: int
-    ) -> Optional[
-        tuple[int, list[float], *tuple[list[float], ...]] | Literal[-1]
-    ]:
+    ) -> Optional[VisionSensorReading]:
         """
         Read the state of a vision sensor.
 
@@ -217,6 +220,31 @@ class CoppeliaSimBridge:
         return self._call_sync(
             lambda: self.sim.readVisionSensor(sensor_handle)
         )
+
+    def read_vision_sensors_multiple(
+        self, sensor_handles: Iterable[int]
+    ) -> list[Optional[VisionSensorReading]]:
+        """
+        Read the state of multiple vision sensors.
+
+        Returns
+        -------
+        list[Optional[VisionSensorReading]]
+            A list of readings, one for each sensor.
+        """
+        readings: list[Optional[VisionSensorReading]] = []
+
+        for handle in sensor_handles:
+            reading = self._call_sync(
+                lambda: self.sim.readVisionSensor(handle)
+            )
+
+            if reading == -1:
+                readings.append(None)
+            else:
+                readings.append(reading)
+
+        return readings
 
     def read_proximity_sensor(
         self, sensor_handle: int
