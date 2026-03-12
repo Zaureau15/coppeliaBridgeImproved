@@ -12,6 +12,8 @@ VisionSensorReading: TypeAlias = (
     tuple[int, list[float], *tuple[list[float], ...]] | Literal[-1]
 )
 
+VisionSensorImage: TypeAlias = tuple[bytes, list[int]]
+
 
 class ZMQRequest:
     """Request object for synchronous communication."""
@@ -166,7 +168,7 @@ class CoppeliaSimBridge:
         rgbaCutOff: float = 0.0,
         pos: list[int] = [0, 0],
         size: list[int] = [0, 0],
-    ) -> Optional[tuple[bytes, list[int]]]:
+    ) -> Optional[VisionSensorImage]:
         """
         Get vision sensor image.
         Consider using alongside unpack_uint8_table to get int values.
@@ -177,6 +179,34 @@ class CoppeliaSimBridge:
                 sensor_handle, options, rgbaCutOff, pos, size
             )
         )
+
+    def get_vision_sensor_img_multiple(
+        self,
+        sensor_handles: Iterable[int],
+        options: int = 0,
+        rgbaCutOff: float = 0.0,
+        pos: list[int] = [0, 0],
+        size: list[int] = [0, 0],
+    ) -> list[Optional[VisionSensorImage]]:
+        """
+        Get images from multiple vision sensors.
+
+        Returns
+        -------
+        list[Optional[VisionSensorImage]]
+            A list of `(image_data, resolution)` tuples, one per sensor.
+        """
+        images: list[Optional[VisionSensorImage]] = []
+
+        for handle in sensor_handles:
+            image = self._call_sync(
+                lambda: self.sim.getVisionSensorImg(
+                    handle, options, rgbaCutOff, pos, size
+                )
+            )
+            images.append(image)
+
+        return images
 
     def unpack_uint8_table(
         self, data: bytes, startUint8Index: int = 0, uint8Count: int = 0
