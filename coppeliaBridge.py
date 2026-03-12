@@ -302,7 +302,7 @@ if __name__ == "__main__":
     bridge.start_simulation()
     time.sleep(0.1)
 
-    handle = bridge.getObject("/proximitySensor")
+    handle = bridge.get_object_handle("/proximitySensor")
     if not handle or handle < 0:
         print("No sensor found")
         exit(1)
