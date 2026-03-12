@@ -256,6 +256,8 @@ class CoppeliaSimBridge:
     ) -> list[Optional[VisionSensorReading]]:
         """
         Read the state of multiple vision sensors.
+        Use this when you are sure you have more than one sensor.
+        It is faster than calling multiple `read_vision_sensor`s.
 
         Returns
         -------
@@ -281,6 +283,8 @@ class CoppeliaSimBridge:
     ) -> Optional[tuple[int, float, list[float], int, list[float]]]:
         """
         Read the state of a proximity sensor.
+        Use this when you are sure you have only one sensor.
+        It is faster than calling multiple `read_proximity_sensor`s.
 
         Returns
         -------
