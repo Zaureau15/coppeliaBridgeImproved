@@ -7,7 +7,6 @@ from collections.abc import Iterable
 # Ignoring type for RemoteAPIClient because stubs are not available
 from coppeliasim_zmqremoteapi_client import RemoteAPIClient  # type: ignore
 
-
 VisionSensorReading: TypeAlias = (
     tuple[int, list[float], *tuple[list[float], ...]] | Literal[-1]
 )
