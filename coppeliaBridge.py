@@ -175,7 +175,11 @@ class CoppeliaSimBridge:
         """
         Get vision sensor image.
         Consider using alongside unpack_uint8_table to get int values.
-        Returns: (image_data, resolution)
+
+        Returns
+        -------
+        VisionSensorImage
+            (image_data, resolution)
         """
         return self._call_sync(
             lambda: self.sim.getVisionSensorImg(
@@ -375,7 +379,11 @@ class CoppeliaSimBridge:
     def set_stepping(self, enable: bool) -> Optional[int]:
         """
         Turn stepping mode on/off.
-        Returns: bool of previous level of thread interruption. When 0,
-        thread interruption was not enabled previously
+
+        Returns
+        -------
+        int
+            bool of previous level of thread interruption. When 0,
+            thread interruption was not enabled previously
         """
         return self._call_sync(lambda: self.sim.setStepping(enable))
