@@ -147,7 +147,9 @@ class CoppeliaSimBridge:
     def get_object_orientation(
         self, object_handle: int, relative_to: int = -1
     ) -> Optional[list[float]]:
-        """Get object orientation [alpha, beta, gamma] (Euler angles)."""
+        """
+        Get object orientation [alpha, beta, gamma] (Euler angles).
+        """
         return self._call_sync(
             lambda: self.sim.getObjectOrientation(object_handle, relative_to)
         )
@@ -158,7 +160,9 @@ class CoppeliaSimBridge:
         orientation: list[float],
         relative_to: int = -1,
     ) -> None:
-        """Set object orientation [alpha, beta, gamma] (Euler angles)."""
+        """
+        Set object orientation [alpha, beta, gamma] (Euler angles).
+        """
         self._call_sync(
             lambda: self.sim.setObjectOrientation(
                 object_handle, relative_to, orientation
@@ -176,7 +180,8 @@ class CoppeliaSimBridge:
         """
         Get vision sensor image.
 
-        Consider using alongside ``unpack_uint8_table`` to get int values.
+        Consider using alongside ``unpack_uint8_table`` to get int
+        values.
 
         Returns
         -------
