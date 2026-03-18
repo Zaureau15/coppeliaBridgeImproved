@@ -1,6 +1,5 @@
 import threading
 import queue
-import time
 from typing import Any, Optional, Callable, Literal, TypeAlias
 from collections.abc import Iterable
 
@@ -42,6 +41,7 @@ class ZMQRequest:
 class CoppeliaSimBridge:
     """
     Thread-safe bridge using CoppeliaSim's official Python API.
+
     Much simpler - no manual CBOR encoding or message formatting!
     """
 
@@ -113,6 +113,7 @@ class CoppeliaSimBridge:
     ) -> Optional[Any]:
         """
         Thread-safe synchronous call to CoppeliaSim.
+
         Can be called from any thread.
         """
         request = ZMQRequest(function, args, kwargs)
@@ -174,8 +175,13 @@ class CoppeliaSimBridge:
     ) -> Optional[VisionSensorImage]:
         """
         Get vision sensor image.
-        Consider using alongside unpack_uint8_table to get int values.
-        Returns: (image_data, resolution)
+
+        Consider using alongside ``unpack_uint8_table`` to get int values.
+
+        Returns
+        -------
+        VisionSensorImage
+            ``(image_data, resolution)``
         """
         return self._call_sync(
             lambda: self.sim.getVisionSensorImg(
@@ -192,12 +198,14 @@ class CoppeliaSimBridge:
         size: list[int] = [0, 0],
     ) -> list[Optional[VisionSensorImage]]:
         """
-        Get images from multiple vision sensors.
+        Get images from multiple vision sensors. Faster than calling
+        ``get_vision_sensor_img`` multiple times.
 
         Returns
         -------
         list[Optional[VisionSensorImage]]
-            A list of `(image_data, resolution)` tuples, one per sensor.
+            A list of ``(image_data, resolution)`` tuples, one per
+            sensor, where ``resolution`` is ``[x, y]``.
         """
         images: list[Optional[VisionSensorImage]] = []
 
@@ -242,10 +250,10 @@ class CoppeliaSimBridge:
                 Detection state (0 or 1).
 
             aux_values: list[float]
-                List of 15 auxiliary values: the minimum of [intensity
-                red green blue depth], the maximum of [intensity red
-                green blue depth], and the average of [intensity red
-                green blue depth]
+                List of 15 auxiliary values: the minimum of
+                ``[intensity red green blue depth]``, the maximum of
+                ``[intensity red green blue depth]``, and the average of
+                ``[intensity red green blue depth]``
 
             additional_packets: list[float]
                 One or more additional auxiliary value packets.
@@ -258,14 +266,13 @@ class CoppeliaSimBridge:
         self, sensor_handles: Iterable[int]
     ) -> list[Optional[VisionSensorReading]]:
         """
-        Read the state of multiple vision sensors.
-        Use this when you are sure you have more than one sensor.
-        It is faster than calling multiple `read_vision_sensor`s.
+        Read the state of multiple vision sensors. Faster than calling
+        ``read_vision_sensor`` multiple times.
 
         Returns
         -------
         list[Optional[VisionSensorReading]]
-            A list of readings, one for each sensor.
+            A list of vision sensor readings, one for each sensor.
         """
         readings: list[Optional[VisionSensorReading]] = []
 
@@ -286,27 +293,25 @@ class CoppeliaSimBridge:
     ) -> Optional[ProximitySensorReading]:
         """
         Read the state of a proximity sensor.
-        Use this when you are sure you have only one sensor.
-        It is faster than calling multiple `read_proximity_sensor`s.
 
         Returns
         -------
         tuple[int, float, list[float], int, list[float]]
             A tuple containing:
 
-            res : int
+            res: int
                 Detection state (0 or 1).
 
-            dist : float
+            dist: float
                 Distance to the detected point.
 
-            point : list[float]
+            point: list[float]
                 Relative coordinates of the detected point as [x, y, z].
 
-            obj : int
+            obj: int
                 Handle of the detected object.
 
-            n : list[float]
+            n: list[float]
                 Normal vector of the detected surface (normalized),
                 relative to the sensor reference frame.
         """
@@ -318,9 +323,8 @@ class CoppeliaSimBridge:
         self, sensor_handles: Iterable[int]
     ) -> list[Optional[ProximitySensorReading]]:
         """
-        Read the state of multiple proximity sensors.
-        Use this when you are sure you have more than one sensor.
-        It is faster than calling multiple `read_proximity_sensor`s.
+        Read the state of multiple proximity sensors. Faster than
+        calling ``read_proximity_sensor`` multiple times.
 
         Returns
         -------
@@ -376,29 +380,11 @@ class CoppeliaSimBridge:
     def set_stepping(self, enable: bool) -> Optional[int]:
         """
         Turn stepping mode on/off.
-        Returns: bool of previous level of thread interruption. When 0,
-        thread interruption was not enabled previously
+
+        Returns
+        -------
+        int
+            bool of previous level of thread interruption. When 0,
+            thread interruption was not enabled previously
         """
         return self._call_sync(lambda: self.sim.setStepping(enable))
-
-
-if __name__ == "__main__":
-    bridge = CoppeliaSimBridge()
-    bridge.start()
-    bridge.stop_simulation()
-    time.sleep(0.1)
-    bridge.start_simulation()
-    time.sleep(0.1)
-
-    handle = bridge.get_object_handle("/proximitySensor")
-    if not handle or handle < 0:
-        print("No sensor found")
-        exit(1)
-    content = bridge.read_proximity_sensor(handle)
-
-    print("handle:", handle, type(handle))
-    print("content:", content, type(content))
-    if not isinstance(content, Iterable):
-        print("Content is not iterable")
-        exit(1)
-    print("elem types:", [type(x) for x in content])
