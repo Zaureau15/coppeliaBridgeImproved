@@ -379,25 +379,3 @@ class CoppeliaSimBridge:
         thread interruption was not enabled previously
         """
         return self._call_sync(lambda: self.sim.setStepping(enable))
-
-
-if __name__ == "__main__":
-    bridge = CoppeliaSimBridge()
-    bridge.start()
-    bridge.stop_simulation()
-    time.sleep(0.1)
-    bridge.start_simulation()
-    time.sleep(0.1)
-
-    handle = bridge.get_object_handle("/proximitySensor")
-    if not handle or handle < 0:
-        print("No sensor found")
-        exit(1)
-    content = bridge.read_proximity_sensor(handle)
-
-    print("handle:", handle, type(handle))
-    print("content:", content, type(content))
-    if not isinstance(content, Iterable):
-        print("Content is not iterable")
-        exit(1)
-    print("elem types:", [type(x) for x in content])
