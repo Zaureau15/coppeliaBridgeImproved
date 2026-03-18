@@ -1,25 +1,27 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath(".."))  # points to your project root
 
-project = "coppeliaBridge"
-author = "trist"
+project: str = "CoppeliaBridge"
+author = "Kevin Leahy, modified by Tristan Letourneau"
 
-extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.intersphinx",
+# ----------------------- General configuration ---------------------- #
+
+extensions: list[str] = [
+    "sphinx.ext.autodoc",  # pulls docstrings from your code
+    "sphinx.ext.napoleon",  # supports Google/NumPy style docstrings
+    "sphinx.ext.viewcode",  # adds "view source" links
+    "sphinx_autodoc_typehints",  # renders type hints nicely
 ]
 
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", None),
-}
+templates_path: list[str] = ["_templates"]
+exclude_patterns: list[str] = []
 
-templates_path = ["_templates"]
-exclude_patterns = ["build"]
+# ------------------------ HTML output options ----------------------- #
 
-html_theme = "alabaster"
-html_static_path = []
+html_theme: str = "alabaster"
+html_static_path: list[str] = ["_static"]
 
-autodoc_typehints = "description"
-python_use_unqualified_type_names = True
+autodoc_typehints = "description"  # Put type hints in parameter section
+python_use_unqualified_type_names = True  # Hide module names for types
