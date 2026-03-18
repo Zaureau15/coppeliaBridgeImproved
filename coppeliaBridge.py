@@ -192,7 +192,8 @@ class CoppeliaSimBridge:
         size: list[int] = [0, 0],
     ) -> list[Optional[VisionSensorImage]]:
         """
-        Get images from multiple vision sensors.
+        Get images from multiple vision sensors. Faster than calling
+        `get_vision_sensor_img` multiple times.
 
         Returns
         -------
@@ -258,9 +259,8 @@ class CoppeliaSimBridge:
         self, sensor_handles: Iterable[int]
     ) -> list[Optional[VisionSensorReading]]:
         """
-        Read the state of multiple vision sensors.
-        Use this when you are sure you have more than one sensor.
-        It is faster than calling multiple `read_vision_sensor`s.
+        Read the state of multiple vision sensors. Faster than calling
+        `read_vision_sensor` multiple times.
 
         Returns
         -------
@@ -318,9 +318,8 @@ class CoppeliaSimBridge:
         self, sensor_handles: Iterable[int]
     ) -> list[Optional[ProximitySensorReading]]:
         """
-        Read the state of multiple proximity sensors.
-        Use this when you are sure you have more than one sensor.
-        It is faster than calling multiple `read_proximity_sensor`s.
+        Read the state of multiple proximity sensors. Faster than
+        calling `read_proximity_sensor` multiple times.
 
         Returns
         -------
